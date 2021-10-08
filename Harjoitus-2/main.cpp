@@ -19,20 +19,20 @@ public:
   }
 };
 
-class Henkilo
+class Person
 {
 public:
   std::string name;
   int age;
   Osoite *osoitePtr;
 
-  Henkilo(const std::string &setNimi, const int &setIka, Osoite *setOsoite)
+  Person(const std::string &setNimi, const int &setIka, Osoite *setOsoite)
       : name(setNimi), age(setIka), osoitePtr(setOsoite)
   {
     std::cout << "Henkilo luotu" << std::endl;
   }
 
-  ~Henkilo()
+  ~Person()
   {
     std::cout << "Henkilo tuhottu" << std::endl;
   }
@@ -46,7 +46,7 @@ public:
 int main()
 {
   Osoite pekanOsoite("Katuosoite 12 A 11", "Tampere");
-  Henkilo pekka("Pekka", 24, &pekanOsoite);
+  Person pekka("Pekka", 24, &pekanOsoite);
 
   pekka.tulostaTiedot();
 

@@ -1,55 +1,51 @@
 #include <iostream>
 using namespace std;
 
-class Osoite
+class Person
 {
 public:
-  std::string katu;
-  std::string kunta;
-
-  Osoite(const std::string &setKatu, const std::string &setKunta)
-      : katu(setKatu), kunta(setKunta)
+  Person(const std::string &setName, const int &setAge)
+      : name(setName), age(setAge)
   {
-    std::cout << "Osoite luotu" << std::endl;
+    std::cout << "Person created" << std::endl;
+    count++;
   }
 
-  ~Osoite()
+  ~Person()
   {
-    std::cout << "Osoite tuhottu" << std::endl;
+    std::cout << "Person destroyed" << std::endl;
   }
-};
 
-class Henkilo
-{
-public:
+  void printInformation()
+  {
+    std::cout << "Person: " << name << " : " << age << std::endl;
+  }
+
+  static int returnCount()
+  {
+    return count;
+  }
+
+private:
+  static int count;
   std::string name;
   int age;
-  Osoite *osoitePtr;
-
-  Henkilo(const std::string &setNimi, const int &setIka, Osoite *setOsoite)
-      : name(setNimi), age(setIka), osoitePtr(setOsoite)
-  {
-    std::cout << "Henkilo luotu" << std::endl;
-  }
-
-  ~Henkilo()
-  {
-    std::cout << "Henkilo tuhottu" << std::endl;
-  }
-
-  void tulostaTiedot()
-  {
-    std::cout << "Henkilo: " << name << " : " << age << " : " << osoitePtr->katu << " : " << osoitePtr->kunta << std::endl;
-  }
 };
+
+// Initialize the counter on program startup
+int Person::count = 0;
 
 int main()
 {
-  Osoite pekanOsoite("Katuosoite 12 A 11", "Tampere");
-  Henkilo pekka("Pekka", 24, &pekanOsoite);
+  Person antti("Antti", 24);
+  antti.printInformation();
 
-  pekka.tulostaTiedot();
+  std::cout << "The current count: " << Person::returnCount() << std::endl;
 
-  // Destructors activating when in Henkilo then Osoite
+  Person pekka("Pekka", 24);
+  pekka.printInformation();
+
+  std::cout << "The current count: " << Person::returnCount() << std::endl;
+
   return 0;
 }
