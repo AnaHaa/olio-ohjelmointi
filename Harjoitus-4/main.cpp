@@ -142,8 +142,7 @@ public:
 
   // Parametrillinen rakentaja
   Opiskelija(const string setName, const int setAge, const int setOpintopisteet)
-    : Person(setName, setAge)
-    , opintopisteet(setOpintopisteet)
+      : Person(setName, setAge), opintopisteet(setOpintopisteet)
   {
   }
 
