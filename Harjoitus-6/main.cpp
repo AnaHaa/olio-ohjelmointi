@@ -102,7 +102,7 @@ int main()
   std::cout << "Sort begins\n";
   sort(persons.begin(), persons.end(), ComparePersonsByAge());
 
-  for (auto& h : persons)
+  for (auto &h : persons)
   {
     h->tulostaTiedot();
   }

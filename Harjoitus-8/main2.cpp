@@ -74,9 +74,8 @@ private:
 
 class PersonSingletonObserver
 {
-  public:
-    virtual void personAdded(const int& aAge) = 0;
-
+public:
+  virtual void personAdded(const int &aAge) = 0;
 };
 
 class PersonSingleton final
@@ -87,8 +86,8 @@ public:
   void addPerson(const Person &aPerson);
   void getPerson(const string &aName);
   void printPersons() const;
-  void registerObserver(const shared_ptr<PersonSingletonObserver>& aObserver);
-  void registerObserverLambda(function<void(const int&)> aObserver);
+  void registerObserver(const shared_ptr<PersonSingletonObserver> &aObserver);
+  void registerObserverLambda(function<void(const int &)> aObserver);
 
 private:
   static shared_ptr<PersonSingleton> instance;
@@ -97,7 +96,7 @@ private:
   PersonSingleton(const PersonSingleton &aPersonSingleton) = delete;
   vector<shared_ptr<Person>> persons;
   vector<shared_ptr<PersonSingletonObserver>> personSingletonObserver;
-  vector<function<void(const int&)>> personSingletonObserverLambda;
+  vector<function<void(const int &)>> personSingletonObserverLambda;
 };
 
 shared_ptr<PersonSingleton> PersonSingleton::instance = nullptr;
@@ -107,7 +106,7 @@ void PersonSingleton::registerObserver(const std::shared_ptr<PersonSingletonObse
   personSingletonObserver.push_back(aObserver);
 }
 
-void PersonSingleton::registerObserverLambda(std::function<void (const int &)> aObserver)
+void PersonSingleton::registerObserverLambda(std::function<void(const int &)> aObserver)
 {
   personSingletonObserverLambda.push_back(aObserver);
 }
@@ -127,12 +126,12 @@ void PersonSingleton::addPerson(const Person &aPerson)
 {
   persons.push_back(std::make_shared<Person>(aPerson));
 
-  for(auto& observer : personSingletonObserver)
+  for (auto &observer : personSingletonObserver)
   {
     observer->personAdded(aPerson.getAge());
   }
 
-  for(auto& observer : personSingletonObserverLambda)
+  for (auto &observer : personSingletonObserverLambda)
   {
     observer(aPerson.getAge());
   }
@@ -146,17 +145,17 @@ void PersonSingleton::printPersons() const
 
 class MyObserver : public PersonSingletonObserver
 {
-  public:
-    MyObserver() = default;
-    virtual void personAdded(const int& aAge)
-    {
-      std::cout << "Event got: " << aAge << endl;
-    }
+public:
+  MyObserver() = default;
+  virtual void personAdded(const int &aAge)
+  {
+    std::cout << "Event got: " << aAge << endl;
+  }
 };
 
 int main()
 {
-  auto myLambdaObsercer = [](const int& aAge)
+  auto myLambdaObsercer = [](const int &aAge)
   {
     std::cout << "Got lambda event: " << aAge << endl;
   };

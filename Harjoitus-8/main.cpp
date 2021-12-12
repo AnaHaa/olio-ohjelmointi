@@ -112,7 +112,7 @@ void PersonSingleton::getPerson(const std::string &aName)
            {
              if (h->getName() == aName)
              {
-                h->tulostaTiedot();
+               h->tulostaTiedot();
              }
            });
 }
