@@ -1,6 +1,7 @@
 #include <iostream>
 #include <memory>
 #include <vector>
+#include <string>
 #include <algorithm>
 using namespace std;
 
@@ -70,64 +71,91 @@ private:
   int age;
 };
 
-class ComparePersonsByAge
+class PersonSingleton final
 {
 public:
-  bool operator()(Person *a, Person *b)
-  {
-    return a->getAge() < b->getAge();
-  }
+  static shared_ptr<PersonSingleton> getInstance();
+
+  void addPerson(const Person &aPerson);
+  void getPerson(const string &aName);
+  void printPersons() const;
+
+private:
+  static shared_ptr<PersonSingleton> instance;
+
+  PersonSingleton() = default;
+  PersonSingleton(const PersonSingleton &aPersonSingleton) = delete;
+  vector<shared_ptr<Person>> persons;
 };
 
-class CompareUniquePersonsByAge
+shared_ptr<PersonSingleton> PersonSingleton::instance = nullptr;
+
+shared_ptr<PersonSingleton> PersonSingleton::getInstance()
 {
-public:
-  bool operator()(const unique_ptr<Person> &a, const unique_ptr<Person> &b)
+  if (!instance)
   {
-    return a->getAge() < b->getAge();
+    instance = shared_ptr<PersonSingleton>(new PersonSingleton());
+    return instance;
   }
-};
+
+  return instance;
+}
+
+void PersonSingleton::addPerson(const Person &aPerson)
+{
+  persons.push_back(std::make_shared<Person>(aPerson));
+}
+
+void PersonSingleton::getPerson(const std::string &aName)
+{
+  for_each(persons.begin(), persons.end(), [aName](auto &h)
+           {
+             if (h->getName() == aName)
+             {
+                h->tulostaTiedot();
+             }
+           });
+}
+
+void PersonSingleton::printPersons() const
+{
+  for_each(persons.begin(), persons.end(), [](auto &h)
+           { h->tulostaTiedot(); });
+}
 
 int main()
 {
-  vector<Person *> persons;
-  persons.push_back(new Person("Kalle", 30));
-  persons.push_back(new Person("Kalle", 25));
-
-  for (auto &h : persons)
+  bool loopMenu = true;
+  do
   {
-    h->tulostaTiedot();
-  }
+    std::cout << "Current persons:\n";
+    PersonSingleton::getInstance()->printPersons();
 
-  std::cout << "Sort begins\n";
-  sort(persons.begin(), persons.end(), ComparePersonsByAge());
+    char choice;
+    string name;
+    int age;
+    std::cout << "1: Save new user, 2: Get user using name, anything else: exit\n";
+    std::cin >> choice;
 
-  for (auto& h : persons)
-  {
-    h->tulostaTiedot();
-  }
+    switch (choice)
+    {
+    case '1':
+      std::cout << "Name: ";
+      cin >> name;
+      std::cout << "Age: ";
+      cin >> age;
+      PersonSingleton::getInstance()->addPerson(Person{name, age});
+      break;
+    case '2':
+      std::cout << "Name: ";
+      cin >> name;
+      PersonSingleton::getInstance()->getPerson(name);
+      break;
+    default:
+      loopMenu = false;
+      break;
+    }
+  } while (loopMenu);
 
-  std::cout << "Unique sorting\n";
-
-  vector<unique_ptr<Person>> uniquePersons;
-
-  uniquePersons.push_back(make_unique<Person>("Pekka", 24));
-  uniquePersons.push_back(make_unique<Person>("Kalle", 30));
-
-  for (auto &h : uniquePersons)
-  {
-    h->tulostaTiedot();
-  }
-
-  std::cout << "Sort begins\n";
-  sort(uniquePersons.begin(), uniquePersons.end(), CompareUniquePersonsByAge());
-
-  for (auto &h : uniquePersons)
-  {
-    h->tulostaTiedot();
-  }
-
-  uniquePersons.clear();
-
-  return 0;
+  return EXIT_SUCCESS;
 }

@@ -1,7 +1,9 @@
 #include <iostream>
 #include <memory>
 #include <vector>
+#include <string>
 #include <algorithm>
+#include <functional>
 using namespace std;
 
 class Person
@@ -42,7 +44,7 @@ public:
   }
 
   // Getter for name
-  string getName()
+  string getName() const
   {
     return name;
   }
@@ -54,12 +56,12 @@ public:
   }
 
   // Getter for age
-  int getAge()
+  int getAge() const
   {
     return age;
   }
 
-  void tulostaTiedot()
+  void tulostaTiedot() const
   {
     std::cout << "Person: " << getName() << " " << getAge() << endl;
   }
@@ -70,34 +72,99 @@ private:
   int age;
 };
 
-class ComparePersonsByAge
+class PersonSingletonObserver
 {
-public:
-  bool operator()(Person *a, Person *b)
-  {
-    return a->getAge() < b->getAge();
-  }
+  public:
+    virtual void personAdded(const int& aAge) = 0;
+
 };
 
-class CompareUniquePersonsByAge
+class PersonSingleton final
 {
 public:
-  bool operator()(const unique_ptr<Person> &a, const unique_ptr<Person> &b)
+  static shared_ptr<PersonSingleton> getInstance();
+
+  void addPerson(const Person &aPerson);
+  void getPerson(const string &aName);
+  void printPersons() const;
+  void registerObserver(const shared_ptr<PersonSingletonObserver>& aObserver);
+  void registerObserverLambda(function<void(const int&)> aObserver);
+
+private:
+  static shared_ptr<PersonSingleton> instance;
+
+  PersonSingleton() = default;
+  PersonSingleton(const PersonSingleton &aPersonSingleton) = delete;
+  vector<shared_ptr<Person>> persons;
+  vector<shared_ptr<PersonSingletonObserver>> personSingletonObserver;
+  vector<function<void(const int&)>> personSingletonObserverLambda;
+};
+
+shared_ptr<PersonSingleton> PersonSingleton::instance = nullptr;
+
+void PersonSingleton::registerObserver(const std::shared_ptr<PersonSingletonObserver> &aObserver)
+{
+  personSingletonObserver.push_back(aObserver);
+}
+
+void PersonSingleton::registerObserverLambda(std::function<void (const int &)> aObserver)
+{
+  personSingletonObserverLambda.push_back(aObserver);
+}
+
+shared_ptr<PersonSingleton> PersonSingleton::getInstance()
+{
+  if (!instance)
   {
-    return a->getAge() < b->getAge();
+    instance = shared_ptr<PersonSingleton>(new PersonSingleton());
+    return instance;
   }
+
+  return instance;
+}
+
+void PersonSingleton::addPerson(const Person &aPerson)
+{
+  persons.push_back(std::make_shared<Person>(aPerson));
+
+  for(auto& observer : personSingletonObserver)
+  {
+    observer->personAdded(aPerson.getAge());
+  }
+
+  for(auto& observer : personSingletonObserverLambda)
+  {
+    observer(aPerson.getAge());
+  }
+}
+
+void PersonSingleton::printPersons() const
+{
+  for_each(persons.begin(), persons.end(), [](auto &h)
+           { h->tulostaTiedot(); });
+}
+
+class MyObserver : public PersonSingletonObserver
+{
+  public:
+    MyObserver() = default;
+    virtual void personAdded(const int& aAge)
+    {
+      std::cout << "Event got: " << aAge << endl;
+    }
 };
 
 int main()
 {
-  int i = 5;
-
-  auto helloWorldLambda = [i]()
+  auto myLambdaObsercer = [](const int& aAge)
   {
-    cout << i << " is the captured variable!\n";
+    std::cout << "Got lambda event: " << aAge << endl;
   };
 
-  helloWorldLambda();
+  PersonSingleton::getInstance()->registerObserverLambda(myLambdaObsercer);
 
-  return 0;
+  PersonSingleton::getInstance()->addPerson(Person{"Antti", 24});
+  PersonSingleton::getInstance()->printPersons();
+
+  return EXIT_SUCCESS;
 }
